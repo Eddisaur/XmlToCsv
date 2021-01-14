@@ -20,14 +20,18 @@ public class XmlConverter {
         this.newFiles = new ArrayList<>();
     }
 
-    private void xmlReader() {
+    //Reads the xml file and collects the data within the target tags
+    public void xmlReader() {
         String csvIntervalData = "";
         try {
+            //Use document builder to access XML attributes
             File file = new File(this.filename);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(file);
             doc.getDocumentElement().normalize();
+
+            //Get data inside the CSVIntervalData tag
             NodeList list = doc.getElementsByTagName("CSVIntervalData");
             Element eElement = (Element) list.item(0);
             csvIntervalData = eElement.getTextContent();
@@ -38,7 +42,8 @@ public class XmlConverter {
         this.data = csvIntervalData;
     }
 
-    private void writeCSV() {
+    //Creates CSV file objects which contain the correct data collected from the XML
+    public void writeCSV() {
         String header = "";
         String trailer = "";
         String csvName = "";
@@ -65,21 +70,28 @@ public class XmlConverter {
         }
         scanner.close();
 
+        //Adds the header and trailer for each CSV object
         for (CsvFile file : newFiles) {
             file.addHeaderAndTrailer(header, trailer);
         }
     }
 
-    private void createCsvFiles() {
-        for (CsvFile file : newFiles) {
-            try {
-                Writer writer = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream("outputFiles\\" + file.getCsvName() + ".csv")));
-                writer.write(file.getData());
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+    //Creates CSV files from the CSV objects
+    public void createCsvFiles() {
+        File dir = new File("outputFiles");
+        if (dir.mkdir()) {
+            for (CsvFile file : newFiles) {
+                try {
+                    Writer writer = new BufferedWriter(new OutputStreamWriter(
+                            new FileOutputStream("outputFiles\\" + file.getCsvName() + ".csv")));
+                    writer.write(file.getData());
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        } else {
+            System.out.println("Directory, \"outputFiles\", cannot be created");
         }
     }
 
